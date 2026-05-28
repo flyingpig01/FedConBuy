@@ -927,6 +927,57 @@ nav a {
   gap: 12px;
 }
 
+.shortlist-status {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 235px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 10px 26px rgba(24, 38, 31, 0.05);
+  padding: 10px 12px;
+}
+
+.shortlist-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--brand-strong);
+  font-size: 14px;
+}
+
+.shortlist-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.shortlist-copy small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.shortlist-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.shortlist-pips i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #d9e3dc;
+}
+
+.shortlist-pips i.filled {
+  background: var(--brand);
+}
+
 .results-list {
   display: grid;
   gap: 12px;
@@ -1562,6 +1613,15 @@ nav a {
 
   .section-header .button {
     width: 100%;
+  }
+
+  .results-topline {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shortlist-status {
+    min-width: 0;
   }
 
   .search-row,

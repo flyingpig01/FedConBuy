@@ -960,7 +960,7 @@ function renderMarketplace() {
               <strong>${filtered.length} qualified-buyer opportunities</strong>
               <div class="fine-print">Filter by EBITDA, SDE multiple, employees, DVBA status, documents, real estate, financing, and verification status.</div>
             </div>
-            <a class="button quiet" href="#compare">${compared.size ? "Review shortlist" : "Shortlist deals"}</a>
+            ${shortlistStatusLink()}
           </div>
           <div class="chip-row" id="flag-filters">
             ${[
@@ -1039,6 +1039,22 @@ function scheduleMarketplaceSearchRender() {
       input.setSelectionRange(input.value.length, input.value.length);
     });
   }, 350);
+}
+
+function shortlistStatusLink() {
+  const size = compared.size;
+  return `
+    <a class="shortlist-status" href="#compare" aria-label="${size ? "Open deal shortlist" : "Open empty deal shortlist"}">
+      <span class="shortlist-mark" aria-hidden="true">★</span>
+      <span class="shortlist-copy">
+        <strong>Shortlist</strong>
+        <small>${size ? "Ready for side-by-side review" : "Add deals from the cards"}</small>
+      </span>
+      <span class="shortlist-pips" aria-hidden="true">
+        ${[0, 1, 2].map((index) => `<i class="${index < size ? "filled" : ""}"></i>`).join("")}
+      </span>
+    </a>
+  `;
 }
 
 function select(id, options, selected) {

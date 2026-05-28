@@ -1145,13 +1145,27 @@ function initializeMarketplaceMap(items) {
 
   const bounds = [];
   positioned.forEach((item) => {
-    const marker = L.marker(item.coordinates).addTo(map);
-    marker.bindPopup(`
-      <strong>${item.title}</strong><br>
-      ${item.city}, ${item.state}<br>
-      Asking ${money(item.askingPrice)} · SDE ${money(item.cashFlowSDE)}<br>
-      <a href="#listing/${item.id}">Open listing</a>
-    `);
+    const marker = L.marker(item.coordinates, {
+      icon: L.divIcon({
+        className: "deal-map-marker",
+        html: `<span>${money(item.askingPrice)}</span>`,
+        iconSize: [74, 34],
+        iconAnchor: [34, 34],
+      }),
+    }).addTo(map);
+    marker.bindPopup(
+      `
+        <strong>${item.title}</strong><br>
+        ${item.city}, ${item.state}<br>
+        Asking ${money(item.askingPrice)} · SDE ${money(item.cashFlowSDE)}<br>
+        <a href="#listing/${item.id}">Open listing</a>
+      `,
+      {
+        autoPanPadding: [18, 18],
+        maxWidth: 240,
+        minWidth: 190,
+      },
+    );
     bounds.push(item.coordinates);
   });
 

@@ -306,27 +306,27 @@ const readinessQuestions = [
   ["timeline", "Months until purchase", 6, ""],
 ];
 
-const cityPositions = {
-  Austin: [48, 68],
-  Boise: [27, 34],
-  Brooklyn: [84, 36],
-  Charlotte: [73, 56],
-  Chicago: [62, 38],
-  Columbus: [68, 42],
-  Denver: [41, 46],
-  "Las Vegas": [24, 52],
-  Miami: [78, 82],
-  Minneapolis: [55, 27],
-  Nashville: [63, 58],
-  Orlando: [76, 77],
-  Phoenix: [29, 61],
-  Portland: [17, 24],
-  Raleigh: [76, 54],
-  Sacramento: [15, 45],
-  "Salt Lake City": [31, 41],
-  "San Diego": [19, 60],
-  Seattle: [18, 17],
-  Tampa: [74, 80],
+const cityCoordinates = {
+  Austin: [30.2672, -97.7431],
+  Boise: [43.615, -116.2023],
+  Brooklyn: [40.6782, -73.9442],
+  Charlotte: [35.2271, -80.8431],
+  Chicago: [41.8781, -87.6298],
+  Columbus: [39.9612, -82.9988],
+  Denver: [39.7392, -104.9903],
+  "Las Vegas": [36.1716, -115.1391],
+  Miami: [25.7617, -80.1918],
+  Minneapolis: [44.9778, -93.265],
+  Nashville: [36.1627, -86.7816],
+  Orlando: [28.5383, -81.3792],
+  Phoenix: [33.4484, -112.074],
+  Portland: [45.5152, -122.6784],
+  Raleigh: [35.7796, -78.6382],
+  Sacramento: [38.5816, -121.4944],
+  "Salt Lake City": [40.7608, -111.891],
+  "San Diego": [32.7157, -117.1611],
+  Seattle: [47.6062, -122.3321],
+  Tampa: [27.9506, -82.4572],
 };
 
 function makeDocuments(available, index) {
@@ -1026,6 +1026,7 @@ function renderMarketplace() {
     });
   });
   wireCards();
+  initializeMarketplaceMap(filtered);
 }
 
 function scheduleMarketplaceSearchRender() {
@@ -1104,45 +1105,65 @@ function flagApplies(flag, listing) {
 
 function mapHTML(items) {
   const visibleItems = items.slice(0, 20);
-  const byRegion = [
-    ["West", visibleItems.filter((item) => ["CA", "OR", "WA", "NV", "AZ", "ID", "UT", "CO"].includes(item.state)).length],
-    ["Central", visibleItems.filter((item) => ["TX", "MN", "IL", "OH", "TN"].includes(item.state)).length],
-    ["Southeast", visibleItems.filter((item) => ["FL", "NC"].includes(item.state)).length],
-    ["Northeast", visibleItems.filter((item) => ["NY"].includes(item.state)).length],
-  ];
   return `
-    <aside class="map-pane" aria-label="US market map">
+    <aside class="map-pane" aria-label="Map of business listing locations">
       <div class="map-header">
         <div>
           <span class="listing-kicker">Market map</span>
-          <h2>DVBA opportunities by region</h2>
+          <h2>Static listing locations</h2>
         </div>
         <span class="badge verified">${visibleItems.length} shown</span>
       </div>
-      <div class="us-market-map">
-        <div class="region-label west">West</div>
-        <div class="region-label central">Central</div>
-        <div class="region-label southeast">Southeast</div>
-        <div class="region-label northeast">Northeast</div>
-        <div class="map-region region-west"></div>
-        <div class="map-region region-central"></div>
-        <div class="map-region region-southeast"></div>
-        <div class="map-region region-northeast"></div>
-        ${visibleItems.map((item, index) => {
-          const [left, top] = cityPositions[item.city] || [50 + (index % 5) * 4, 50 + (index % 4) * 4];
-          const score = dealFitScore(item);
-          return `<a class="map-pin" href="#listing/${item.id}" style="left:${left}%;top:${top}%" title="${item.title}">
-            <strong>${money(item.askingPrice)}</strong>
-            <small>${item.city}, ${item.state}</small>
-            <span>${score} fit</span>
-          </a>`;
-        }).join("")}
-      </div>
-      <div class="map-region-stats">
-        ${byRegion.map(([region, count]) => `<div><strong>${count}</strong><span>${region}</span></div>`).join("")}
-      </div>
+      <div id="marketplace-map" class="real-map"></div>
+      <p class="map-note">Pins use static city coordinates from the seeded listings. Exact addresses stay confidential until buyer verification and NDA approval.</p>
     </aside>
   `;
+}
+
+function initializeMarketplaceMap(items) {
+  const mapNode = document.querySelector("#marketplace-map");
+  if (!mapNode || !window.L) {
+    if (mapNode) {
+      mapNode.innerHTML = `<div class="map-fallback">Map tiles are loading. Listing locations remain available on each card.</div>`;
+    }
+    return;
+  }
+
+  const positioned = items
+    .map((item) => ({ ...item, coordinates: cityCoordinates[item.city] }))
+    .filter((item) => item.coordinates)
+    .slice(0, 20);
+
+  const map = L.map(mapNode, {
+    scrollWheelZoom: false,
+  });
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18,
+  }).addTo(map);
+
+  const bounds = [];
+  positioned.forEach((item) => {
+    const marker = L.marker(item.coordinates).addTo(map);
+    marker.bindPopup(`
+      <strong>${item.title}</strong><br>
+      ${item.city}, ${item.state}<br>
+      Asking ${money(item.askingPrice)} · SDE ${money(item.cashFlowSDE)}<br>
+      <a href="#listing/${item.id}">Open listing</a>
+    `);
+    bounds.push(item.coordinates);
+  });
+
+  if (bounds.length > 1) {
+    map.fitBounds(bounds, { padding: [28, 28] });
+  } else if (bounds.length === 1) {
+    map.setView(bounds[0], 9);
+  } else {
+    map.setView([39.5, -98.35], 4);
+  }
+
+  setTimeout(() => map.invalidateSize(), 0);
 }
 
 function renderDetail(id) {

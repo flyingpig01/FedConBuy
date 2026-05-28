@@ -211,7 +211,7 @@ const buyerServices = [
   {
     title: "CPA Quality of Earnings Lite",
     category: "Diligence",
-    description: "Normalize SDE, verify add-backs, compare deposits to reported revenue, and flag cash-flow risks before LOI.",
+    description: "Normalize SDE, verify add-backs, reconcile deposits to reported revenue, and flag cash-flow risks before LOI.",
     cta: "Check earnings",
   },
   {
@@ -264,7 +264,7 @@ const membershipPlans = [
     name: "Buyer Pro",
     price: "$49/mo",
     audience: "Active disabled veteran buyers",
-    features: ["Full financial snapshots", "Deal fit scores", "Save and compare listings", "Watchlist alerts", "Buyer return calculators"],
+    features: ["Full financial snapshots", "Deal fit scores", "Shortlist listings", "Watchlist alerts", "Buyer return calculators"],
     cta: "Unlock deal analysis",
   },
   {
@@ -441,7 +441,7 @@ function renderHome() {
       <section class="section quiet-band">
         <div class="section-header">
           <div>
-            <h2>Compare by Industry</h2>
+            <h2>Browse by Industry</h2>
             <p>Scan acquisition categories by typical price, earnings, and financing readiness.</p>
           </div>
           <a class="button quiet" href="#marketplace">Open marketplace</a>
@@ -550,7 +550,7 @@ function qualificationContent() {
       <div class="section qualification-grid">
         <div class="stat-card"><strong>1</strong><span class="muted">Verify disabled veteran buyer status before seller contact and NDA access.</span></div>
         <div class="stat-card"><strong>2</strong><span class="muted">Review DVBA member status, veteran ownership, and transfer readiness on every listing.</span></div>
-        <div class="stat-card"><strong>3</strong><span class="muted">Compare financial fit, debt service, transition support, and certification requirements.</span></div>
+        <div class="stat-card"><strong>3</strong><span class="muted">Review financial fit, debt service, transition support, and certification requirements.</span></div>
       </div>
     </section>
   `;
@@ -925,7 +925,7 @@ function cardHTML(listing) {
         <div class="badge-row">${badges(listing).slice(0, 4).map(([label, type]) => `<span class="badge ${type}">${label}</span>`).join("")}</div>
         <div class="card-actions">
           <a class="button primary detail-link" href="#listing/${listing.id}">View deal</a>
-          <button class="button quiet compare-button" type="button" data-compare="${listing.id}">${compared.has(listing.id) ? "Remove" : "Add to compare"}</button>
+          <button class="button quiet compare-button" type="button" data-compare="${listing.id}">${compared.has(listing.id) ? "Shortlisted" : "Shortlist"}</button>
         </div>
       </div>
     </article>
@@ -960,7 +960,7 @@ function renderMarketplace() {
               <strong>${filtered.length} qualified-buyer opportunities</strong>
               <div class="fine-print">Filter by EBITDA, SDE multiple, employees, DVBA status, documents, real estate, financing, and verification status.</div>
             </div>
-            <a class="button quiet" href="#compare">Compare ${compared.size}</a>
+            <a class="button quiet" href="#compare">${compared.size ? "Review shortlist" : "Shortlist deals"}</a>
           </div>
           <div class="chip-row" id="flag-filters">
             ${[
@@ -1142,7 +1142,7 @@ function renderDetail(id) {
           <p class="fine-print">${listing.buyerEligibility} · ${listing.veteranCertification}</p>
           <div class="card-actions">
             <button class="button primary" data-save="${listing.id}" type="button">${saved.has(listing.id) ? "Saved" : "Save"}</button>
-            <button class="button" data-compare="${listing.id}" type="button">${compared.has(listing.id) ? "Remove from compare" : "Add to compare"}</button>
+            <button class="button" data-compare="${listing.id}" type="button">${compared.has(listing.id) ? "Shortlisted" : "Shortlist deal"}</button>
           </div>
         </div>
       </div>
@@ -1628,26 +1628,33 @@ function renderSaved() {
 function renderCompare() {
   const items = listings.filter((item) => compared.has(item.id));
   const available = listings.filter((item) => !compared.has(item.id)).slice(0, 6);
+  const remainingSlots = Math.max(3 - compared.size, 0);
   app.innerHTML = `
     <section class="page">
       <div class="section section-header">
-        <div><h1>Compare Deals</h1><p>Side-by-side price, SDE, EBITDA, multiple, DVBA status, buyer eligibility, real estate, operations, and documents.</p></div>
+        <div><h1>Deal Shortlist</h1><p>Collect up to three opportunities, then review price, SDE, EBITDA, multiples, DVBA status, operations, and documents side by side.</p></div>
         <a class="button primary" href="#marketplace">Browse marketplace</a>
-      </div>
-      <div class="section">
-        ${
-          items.length
-            ? `<div class="compare-grid">${items.map(compareCard).join("")}</div>`
-            : empty("Nothing to compare yet", "Use the picker below to add up to three listings side by side.")
-        }
       </div>
       <section class="section">
         <div class="section-header">
           <div>
-            <h2>Add Listings to Compare</h2>
-            <p>Select up to three opportunities. Added listings appear above immediately.</p>
+            <h2>Side-by-Side Review</h2>
+            <p>${items.length ? "These are the deals currently in your shortlist." : "Your shortlist is empty. Add deals below to start a side-by-side review."}</p>
           </div>
-          <span class="badge verified">${compared.size}/3 selected</span>
+        </div>
+        ${
+          items.length
+            ? `<div class="compare-grid">${items.map(compareCard).join("")}</div>`
+            : empty("No shortlisted deals yet", "Choose a few opportunities from the picker below.")
+        }
+      </section>
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Build Your Shortlist</h2>
+            <p>${remainingSlots ? `You have room for ${remainingSlots} more ${remainingSlots === 1 ? "deal" : "deals"}.` : "Your shortlist is full. Remove a deal above to add another."}</p>
+          </div>
+          <span class="badge verified">Up to three deals</span>
         </div>
         <div class="compare-picker">
           ${available.map(comparePickerCard).join("")}
@@ -1666,7 +1673,7 @@ function comparePickerCard(listing) {
         <h3>${listing.title}</h3>
         <p class="muted">${listing.city}, ${listing.state} · ${money(listing.cashFlowSDE)} SDE · ${multiple(listing)}</p>
       </div>
-      <button class="button primary" type="button" data-compare="${listing.id}">Add to compare</button>
+      <button class="button primary" type="button" data-compare="${listing.id}">Shortlist deal</button>
     </article>
   `;
 }
@@ -1685,7 +1692,7 @@ function compareCard(listing) {
       ${metric("Buyer eligibility", "Disabled veteran")}
       <div class="badge-row">${badges(listing).slice(0, 4).map(([label, type]) => `<span class="badge ${type}">${label}</span>`).join("")}</div>
       <a class="button primary" href="#listing/${listing.id}">Open detail</a>
-      <button class="button quiet" data-compare="${listing.id}" type="button">Remove</button>
+      <button class="button quiet" data-compare="${listing.id}" type="button">Remove from shortlist</button>
     </article>
   `;
 }
@@ -1729,13 +1736,13 @@ function wireCards() {
       const id = button.dataset.compare;
       if (compared.has(id)) {
         compared.delete(id);
-        toast("Removed from comparison.");
+        toast("Removed from shortlist.");
       } else if (compared.size >= 3) {
-        toast("Comparison is capped at three listings.");
+        toast("Your shortlist holds up to three deals.");
         return;
       } else {
         compared.add(id);
-        toast("Added to comparison.");
+        toast("Added to shortlist.");
       }
       saveState();
       render();

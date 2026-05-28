@@ -152,6 +152,7 @@ const app = document.querySelector("#app");
 const saved = new Set(JSON.parse(localStorage.getItem("savedListings") || "[]"));
 const compared = new Set(JSON.parse(localStorage.getItem("compareListings") || "[]"));
 let sellerStep = 0;
+let marketplaceSearchTimer;
 
 const filters = {
   query: "",
@@ -991,7 +992,7 @@ function renderMarketplace() {
   `;
   document.querySelector("#query-filter").addEventListener("input", (event) => {
     filters.query = event.target.value;
-    renderMarketplace();
+    scheduleMarketplaceSearchRender();
   });
   document.querySelector("#industry-filter").addEventListener("change", (event) => {
     filters.industry = event.target.value;
@@ -1025,6 +1026,19 @@ function renderMarketplace() {
     });
   });
   wireCards();
+}
+
+function scheduleMarketplaceSearchRender() {
+  window.clearTimeout(marketplaceSearchTimer);
+  marketplaceSearchTimer = window.setTimeout(() => {
+    renderMarketplace();
+    requestAnimationFrame(() => {
+      const input = document.querySelector("#query-filter");
+      if (!input) return;
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
+  }, 350);
 }
 
 function select(id, options, selected) {

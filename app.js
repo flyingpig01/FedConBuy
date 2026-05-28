@@ -925,7 +925,7 @@ function cardHTML(listing) {
         <div class="badge-row">${badges(listing).slice(0, 4).map(([label, type]) => `<span class="badge ${type}">${label}</span>`).join("")}</div>
         <div class="card-actions">
           <a class="button primary detail-link" href="#listing/${listing.id}">View deal</a>
-          <button class="button quiet compare-button" type="button" data-compare="${listing.id}">${compared.has(listing.id) ? "Compared" : "Compare"}</button>
+          <button class="button quiet compare-button" type="button" data-compare="${listing.id}">${compared.has(listing.id) ? "Remove" : "Add to compare"}</button>
         </div>
       </div>
     </article>
@@ -1142,7 +1142,7 @@ function renderDetail(id) {
           <p class="fine-print">${listing.buyerEligibility} · ${listing.veteranCertification}</p>
           <div class="card-actions">
             <button class="button primary" data-save="${listing.id}" type="button">${saved.has(listing.id) ? "Saved" : "Save"}</button>
-            <button class="button" data-compare="${listing.id}" type="button">${compared.has(listing.id) ? "Compared" : "Compare"}</button>
+            <button class="button" data-compare="${listing.id}" type="button">${compared.has(listing.id) ? "Remove from compare" : "Add to compare"}</button>
           </div>
         </div>
       </div>
@@ -1627,22 +1627,48 @@ function renderSaved() {
 
 function renderCompare() {
   const items = listings.filter((item) => compared.has(item.id));
+  const available = listings.filter((item) => !compared.has(item.id)).slice(0, 6);
   app.innerHTML = `
     <section class="page">
       <div class="section section-header">
         <div><h1>Compare Deals</h1><p>Side-by-side price, SDE, EBITDA, multiple, DVBA status, buyer eligibility, real estate, operations, and documents.</p></div>
-        <a class="button primary" href="#marketplace">Add listings</a>
+        <a class="button primary" href="#marketplace">Browse marketplace</a>
       </div>
       <div class="section">
         ${
           items.length
             ? `<div class="compare-grid">${items.map(compareCard).join("")}</div>`
-            : empty("Nothing to compare yet", "Add up to three listings from any card to compare acquisition fundamentals.")
+            : empty("Nothing to compare yet", "Use the picker below to add up to three listings side by side.")
         }
       </div>
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Add Listings to Compare</h2>
+            <p>Select up to three opportunities. Added listings appear above immediately.</p>
+          </div>
+          <span class="badge verified">${compared.size}/3 selected</span>
+        </div>
+        <div class="compare-picker">
+          ${available.map(comparePickerCard).join("")}
+        </div>
+      </section>
     </section>
   `;
   wireCards();
+}
+
+function comparePickerCard(listing) {
+  return `
+    <article class="compare-picker-card">
+      <div>
+        <span class="listing-kicker">${listing.industry}</span>
+        <h3>${listing.title}</h3>
+        <p class="muted">${listing.city}, ${listing.state} · ${money(listing.cashFlowSDE)} SDE · ${multiple(listing)}</p>
+      </div>
+      <button class="button primary" type="button" data-compare="${listing.id}">Add to compare</button>
+    </article>
+  `;
 }
 
 function compareCard(listing) {

@@ -1420,6 +1420,28 @@ nav a {
   padding: 16px;
 }
 
+.compare-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.compare-picker-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 10px 26px rgba(24, 38, 31, 0.05);
+  padding: 14px;
+}
+
+.compare-picker-card h3,
+.compare-picker-card p {
+  margin: 0;
+}
+
 .empty-state {
   display: grid;
   min-height: 280px;
@@ -1533,6 +1555,15 @@ nav a {
     min-height: 620px;
   }
 
+  .section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .section-header .button {
+    width: 100%;
+  }
+
   .search-row,
   .listing-grid,
   .home-stats,
@@ -1553,6 +1584,7 @@ nav a {
   .calc-output,
   .seller-shell,
   .form-grid,
+  .compare-picker-card,
   .compare-grid,
   .filter-bar {
     grid-template-columns: 1fr;

@@ -305,6 +305,29 @@ const readinessQuestions = [
   ["timeline", "Months until purchase", 6, ""],
 ];
 
+const cityPositions = {
+  Austin: [48, 68],
+  Boise: [27, 34],
+  Brooklyn: [84, 36],
+  Charlotte: [73, 56],
+  Chicago: [62, 38],
+  Columbus: [68, 42],
+  Denver: [41, 46],
+  "Las Vegas": [24, 52],
+  Miami: [78, 82],
+  Minneapolis: [55, 27],
+  Nashville: [63, 58],
+  Orlando: [76, 77],
+  Phoenix: [29, 61],
+  Portland: [17, 24],
+  Raleigh: [76, 54],
+  Sacramento: [15, 45],
+  "Salt Lake City": [31, 41],
+  "San Diego": [19, 60],
+  Seattle: [18, 17],
+  Tampa: [74, 80],
+};
+
 function makeDocuments(available, index) {
   const docs = [
     ["P&L statements", "nda_required"],
@@ -1050,15 +1073,44 @@ function flagApplies(flag, listing) {
 }
 
 function mapHTML(items) {
+  const visibleItems = items.slice(0, 20);
+  const byRegion = [
+    ["West", visibleItems.filter((item) => ["CA", "OR", "WA", "NV", "AZ", "ID", "UT", "CO"].includes(item.state)).length],
+    ["Central", visibleItems.filter((item) => ["TX", "MN", "IL", "OH", "TN"].includes(item.state)).length],
+    ["Southeast", visibleItems.filter((item) => ["FL", "NC"].includes(item.state)).length],
+    ["Northeast", visibleItems.filter((item) => ["NY"].includes(item.state)).length],
+  ];
   return `
-    <aside class="map-pane" aria-label="Map placeholder">
-      <div class="map-road"></div>
-      <div class="map-road secondary"></div>
-      ${items.slice(0, 10).map((item, index) => {
-        const left = 10 + ((index * 23) % 72);
-        const top = 10 + ((index * 31) % 72);
-        return `<a class="map-pin" href="#listing/${item.id}" style="left:${left}%;top:${top}%">${money(item.askingPrice)}<small>${item.city}</small></a>`;
-      }).join("")}
+    <aside class="map-pane" aria-label="US market map">
+      <div class="map-header">
+        <div>
+          <span class="listing-kicker">Market map</span>
+          <h2>DVBA opportunities by region</h2>
+        </div>
+        <span class="badge verified">${visibleItems.length} shown</span>
+      </div>
+      <div class="us-market-map">
+        <div class="region-label west">West</div>
+        <div class="region-label central">Central</div>
+        <div class="region-label southeast">Southeast</div>
+        <div class="region-label northeast">Northeast</div>
+        <div class="map-region region-west"></div>
+        <div class="map-region region-central"></div>
+        <div class="map-region region-southeast"></div>
+        <div class="map-region region-northeast"></div>
+        ${visibleItems.map((item, index) => {
+          const [left, top] = cityPositions[item.city] || [50 + (index % 5) * 4, 50 + (index % 4) * 4];
+          const score = dealFitScore(item);
+          return `<a class="map-pin" href="#listing/${item.id}" style="left:${left}%;top:${top}%" title="${item.title}">
+            <strong>${money(item.askingPrice)}</strong>
+            <small>${item.city}, ${item.state}</small>
+            <span>${score} fit</span>
+          </a>`;
+        }).join("")}
+      </div>
+      <div class="map-region-stats">
+        ${byRegion.map(([region, count]) => `<div><strong>${count}</strong><span>${region}</span></div>`).join("")}
+      </div>
     </aside>
   `;
 }

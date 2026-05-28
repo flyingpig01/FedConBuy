@@ -1136,7 +1136,7 @@ function renderDetail(id) {
       <div class="section detail-hero">
         <div class="detail-media" style="--image: ${listing.image}"></div>
         <div class="detail-title">
-          <div class="badge-row">${badges(listing).slice(0, 5).map(([label, type]) => `<span class="badge ${type}">${label}</span>`).join("")}</div>
+          ${heroBadgeStrip(listing)}
           <h1>${listing.title}</h1>
           <p>${listing.city}, ${listing.state} · ${listing.industry}</p>
           <p class="fine-print">${listing.buyerEligibility} · ${listing.veteranCertification}</p>
@@ -1171,6 +1171,26 @@ function renderDetail(id) {
   document.querySelectorAll("[data-nda]").forEach((button) => {
     button.addEventListener("click", () => toast("NDA request submitted. Seller approval is now pending."));
   });
+}
+
+function heroBadgeStrip(listing) {
+  const allBadges = badges(listing);
+  const priorityLabels = ["Transparent Listing", "CPA Reviewed", "SBA Eligible"];
+  const primary = priorityLabels
+    .map((label) => allBadges.find(([badgeLabel]) => badgeLabel === label))
+    .filter(Boolean);
+  const fallback = allBadges.filter(([label]) => !priorityLabels.includes(label));
+  const visible = [...primary, ...fallback].slice(0, 3);
+  const remaining = Math.max(allBadges.length - visible.length, 0);
+  return `
+    <div class="detail-trust-strip">
+      <span class="detail-eyebrow">Verified acquisition opportunity</span>
+      <div class="badge-row detail-badge-row">
+        ${visible.map(([label, type]) => `<span class="badge ${type}">${label}</span>`).join("")}
+        ${remaining ? `<span class="badge muted-badge">+${remaining} more</span>` : ""}
+      </div>
+    </div>
+  `;
 }
 
 function overviewPanel(listing) {

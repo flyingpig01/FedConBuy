@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VetBuys | Disabled veteran business acquisitions</title>
+    <link rel="stylesheet" href="styles.css?v=8" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#home" aria-label="VetBuys home">
+        <span class="brand-mark">VB</span>
+        <span>
+          <strong>VetBuys</strong>
+          <small>DVBA business transfers</small>
+        </span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#marketplace">Marketplace</a>
+        <a href="#buyers">Buyers</a>
+        <a href="#sellers">Sellers</a>
+        <a href="#services">Services</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#compare">Compare</a>
+        <a href="#saved">Saved</a>
+        <a href="#sell" class="nav-cta">List a business</a>
+      </nav>
+    </header>
+
+    <main id="app" aria-live="polite"></main>
+
+    <template id="listing-card-template">
+      <article class="listing-card">
+        <button class="save-button" type="button" aria-label="Save listing"></button>
+        <div class="listing-image"></div>
+        <div class="listing-body">
+          <div class="listing-kicker"></div>
+          <h3></h3>
+          <p class="muted location"></p>
+          <div class="metric-grid compact"></div>
+          <div class="trend-row"></div>
+          <p class="description"></p>
+          <div class="badge-row"></div>
+          <div class="card-actions">
+            <a class="button primary detail-link">View deal</a>
+            <button class="button quiet compare-button" type="button">Compare</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js?v=8"></script>
+  </body>
+</html>
